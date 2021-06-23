@@ -732,15 +732,16 @@ impl<'cfg> RustcTargetData<'cfg> {
             }));
         for kind in all_kinds {
             if let CompileKind::Target(target) = kind {
-                if !res.target_config.contains_key(&target) {
-                    res.target_config
-                        .insert(target, res.config.target_cfg_triple(target.short_name())?);
+                if let Entry::Vacant(e) = res.target_config.entry(target) {
+                    e.insert(res.config.target_cfg_triple(target.short_name())?);
                 }
-                if !res.target_info.contains_key(&target) {
-                    res.target_info.insert(
-                        target,
-                        TargetInfo::new(res.config, &res.requested_kinds, &res.rustc, kind)?,
-                    );
+                if let Entry::Vacant(e) = res.target_info.entry(target) {
+                    e.insert(TargetInfo::new(
+                        res.config,
+                        &res.requested_kinds,
+                        &res.rustc,
+                        kind,
+                    )?);
                 }
             }
         }
